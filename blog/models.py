@@ -13,3 +13,7 @@ class Post(models.Model):
     #각 object의 primarykey(id), title을 목록에 보여주는 함수
     def __str__(self):
         return f'[{self.pk}]{self.title}'
+
+    # 각 상세 페이지로 이동 + 장고에 view on site 버튼
+    def get_absolute_url(self):
+        return f'/blog/{self.pk}'
