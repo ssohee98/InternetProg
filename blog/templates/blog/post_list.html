@@ -7,7 +7,8 @@
 <body>
     <h1>Blog</h1>
 
-    {% for p in posts %}    <!--Post에 있는 포스트 개수만큼 반복-->
+<!--    { % for p in posts % }    Post에 있는 포스트 개수만큼 반복-->
+    {% for p in post_list %}
         <hr/>
         <h3>{{ p }} </h3>  <!--models 에서 지정해 놓은대로-->
         <h2> <a href="{{ p.get_absolute_url }}"> {{ p.title }} </a></h2>    <!--p 각각 필드에 대해 제목/ models에 함수로 링크 연결-->
