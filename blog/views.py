@@ -29,7 +29,7 @@ class PostList(ListView) :
     # template_name = 'blog/post_list.html'
     # post_list.html
     # 따로 템플릿 연결을 하지 않아도 클래스에 해당하는 html 이름으로 바꾸었으므로 자동으로 연결된다.
-    
+
 
 class PostDetail(DetailView) :
     model = Post
