@@ -104,14 +104,23 @@
                 {% for p in post_list %}    <!--post_list에 있는 post 개수만큼 p로 받아 반복문-->
                  <!-- Blog post-->
                  <div class="card mb-4">
-                    <img class="card-img-top" src="{{ p.head_image.url }}" alt="..." />
+                    {% if p.head_image %}   <!-- 이미지가 있는지 없는지 -> 있는경우에만 이미지를 출력하도록 하여 오류나지 않도록-->
+                        <img class="card-img-top" src="{{ p.head_image.url }}" alt="{{p}}의 head image" />     <!-- 이미지가 없으면 오류발생-->
+                    {% else %}
+                        <img class="card-img-top" src="https://picsum.photos/seed/{{p.id}}/800/200"
+                             alt="random iamage"/>       <!-- 이미지가 없으면 800x200 크기의 랜덤 이미지 송출/ 그런데 같은 이미지로 모두 송출(seed/p.id 고유 아이디를 줘서 각각 다르게 송출)-->
+                    {% endif %}
+
                     <div class="card-body">
-                        <h2 class="card-title h4">{{ p.title }}</h2>
-                        <p class="card-text">{{ p.content }}</p>
+                        <h2 class="card-title h4">{{ p.title | upper}}</h2>
+                        {% if p.hook_text %}    <!-- hook_text가 있으면 출력, 없으면 말고-->
+                            <h5 class="text_muted"> {{ p.hook_text }} </h5>
+                        {% endif %}
+                        <p class="card-text">{{ p.content | truncatewords:45 }}</p>     <!--목록페이지 모든 내용 출력하지 않고 45자까지만 출력-->
                         <a class="btn btn-primary" href="{{ p.get_absolute_url }}">Read more →</a>
                     </div>
                     <div class="card-footer">
-                        <div class="small text-muted">{{ p.created_at }} by 작성자(개발예정)</div>
+                        <div class="small text-muted">{{ p.created_at | date:"yy-m-d h:m:s"}} by 작성자(개발예정)</div>
                     </div>
                 </div>
                 {% endfor %}
