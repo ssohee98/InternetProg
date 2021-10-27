@@ -7,6 +7,27 @@ class TestView(TestCase):
     def setUp(self):
         self.client = Client()
 
+    # navbar 테스트
+    def navbar_test(self, soup):
+        # 네비게이션 바가 있는가
+        navbar = soup.nav
+        # 네이게이션 바에 Blog, AboutMe 라는 문구가 있는가
+        self.assertIn('Blog', navbar.text)
+        self.assertIn('About Me', navbar.text)
+        # (완전 일치가(self.assertEqual) 아닌 부분적 일치(self.assertIn))
+        self.assertIn('Blog', navbar.text)
+        self.assertIn('About Me', navbar.text)
+
+        # 각 태그가 잘 연결되어 있는지 확인
+        logo = navbar.find('a', text='Internet Programming')
+        self.assertEqual(logo.attrs['href'], '/')
+        home = navbar.find('a', text='Home')
+        self.assertEqual(home.attrs['href'], '/')
+        blog = navbar.find('a', text='Blog')
+        self.assertEqual(blog.attrs['href'], '/blog/')
+        about = navbar.find('a', text='About Me')
+        self.assertEqual(about.attrs['href'], '/about_me/')
+
     # 블로그 테스트
     def test_post_list(self):
         # 포스트 목록 페이지를 가져온다
@@ -16,12 +37,8 @@ class TestView(TestCase):
         # 페이지 타이틀이 'Blog'인가
         soup = BeautifulSoup(response.content, 'html.parser')
         self.assertEqual(soup.title.text, 'Blog')
-        # 네비게이션 바가 있는가
-        navbar = soup.nav
-        # 네이게이션 바에 Blog, AboutMe 라는 문구가 있는가
-        # (완전 일치가(self.assertEqual) 아닌 부분적 일치(self.assertIn))
-        self.assertIn('Blog', navbar.text)
-        self.assertIn('About Me', navbar.text)
+
+        self.navbar_test(soup)
 
         # 포스트(게시물)이 하나도 없는 경우
         self.assertEqual(Post.objects.count(), 0)
@@ -62,10 +79,9 @@ class TestView(TestCase):
         response = self.client.get('/blog/1/')
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'html.parser')
-        # 포스트 목록과 같은 네비게이션 바가 있는가
-        navbar = soup.nav
-        self.assertIn('Blog', navbar.text)
-        self.assertIn('About Me', navbar.text)
+
+        self.navbar_test(soup)
+
         # 포스트의 title은 웹브라우저의 title에 존재하는가
         self.assertIn(post_001.title, soup.title.text)
         # 포스트의 title은 포스트 영역에 존재하는가
