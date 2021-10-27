@@ -3,6 +3,16 @@ from django.contrib.auth.models import User
 import os
 
 # Create your models here.
+class Category(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'Categories'
+
 
 class Post(models.Model):
     title = models.CharField(max_length=30)
@@ -23,6 +33,8 @@ class Post(models.Model):
     # author = models.ForeignKey(User, on_delete=models.CASCADE)
     # User에서 어떤 사용자가 삭제되면 그 사용자가 생성한 포스트는 남도록
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
 
     #각 object의 primarykey(id), title, 저자정보를 목록에 보여주는 함수
     def __str__(self):
