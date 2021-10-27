@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 import os
 
 # Create your models here.
@@ -17,11 +18,15 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     #사용자 지정이 아니라 포스트 생성시 자동으로 현재 시간, 날짜 데베에 저장
     updated_at = models.DateTimeField(auto_now=True)
-    #author
 
-    #각 object의 primarykey(id), title을 목록에 보여주는 함수
+    # User에서 어떤 사용자가 삭제되면 그 사용자가 생성한 포스트도 모두 삭제
+    # author = models.ForeignKey(User, on_delete=models.CASCADE)
+    # User에서 어떤 사용자가 삭제되면 그 사용자가 생성한 포스트는 남도록
+    author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+
+    #각 object의 primarykey(id), title, 저자정보를 목록에 보여주는 함수
     def __str__(self):
-        return f'[{self.pk}]{self.title}'
+        return f'[{self.pk}]{self.title} :: {self.author}'
 
     # 각 상세 페이지로 이동 + 장고에 view on site 버튼
     def get_absolute_url(self):
