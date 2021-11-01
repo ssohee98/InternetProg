@@ -61,6 +61,23 @@ class TestView(TestCase):
         self.assertIn(f'{self.category_culture.name} ({self.category_culture.post_set.count()})', category.text)
         self.assertIn(f'미분류 (1)', category.text)
 
+    def test_category_page(self):
+        # 카테고리 페이지 url로 불러오기
+        response = self.client.get(self.category_programming.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        # beautifulsoup4로 html을 parser하기
+        soup = BeautifulSoup(response.content, 'html.parser')
+        self.navbar_test(soup)
+        self.category_test(soup)
+        # 카테고리 name을 포함하고 있는지
+        self.assertIn(self.category_programming.name, soup.h1.text)
+        # 카테고리에 포함된 post만 포함하고 있는지
+        main_area = soup.find('div', id='main-area')
+        self.assertIn(self.category_programming.name, main_area.text)
+        self.assertIn(self.post_001.title, main_area.text)
+        self.assertNotIn(self.post_002.title, main_area.text)
+        self.assertNotIn(self.post_003.title, main_area.text)
+
     # 블로그 테스트
     def test_post_list(self):
         # 포스트 목록 페이지를 가져온다
@@ -90,7 +107,7 @@ class TestView(TestCase):
 
         post_003_card = main_area.find('div', id='post-3')
         self.assertIn(self.post_003.title, post_003_card.text)
-        self.assertIn('미분류', post_003_card.text)
+        self.assertIn('미분류 ', post_003_card.text)
 
         self.assertIn(self.user_james.username.upper(), main_area.text)
         self.assertIn(self.user_trump.username.upper(), main_area.text)

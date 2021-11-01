@@ -48,4 +48,18 @@ class PostDetail(DetailView) :
     # template_name = 'blog/post_detail.html'
     # post_detail.html
 
+def category_page(request, slug):
+    if slug == 'no_category' :
+        category = '미분류'
+        post_list = Post.objects.filter(category=None)
+    else :
+        category = Category.objects.get(slug=slug)  # 받은 slug값과 같으면 카테고리값을 가져옴
+        post_list = Post.objects.filter(category=category)
 
+    return render(request, 'blog/post_list.html',
+                  {
+                      'post_list' : post_list,  #카테고리 값이 같은 Post만 가져옴
+                      'categories' : Category.objects.all(),
+                      'no_category_post_count' : Post.objects.filter(category=None).count(),
+                      'category' : category
+                  })
