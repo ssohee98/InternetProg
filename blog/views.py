@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 
-from .models import Post, Category
+from .models import Post, Category, Tag
+
 
 # Create your views here.
 
@@ -23,7 +24,7 @@ from .models import Post, Category
 #                   }
 #                   )
 
-class PostList(ListView) :
+class PostList(ListView):
     model = Post
     ordering = '-pk'
 
@@ -37,7 +38,8 @@ class PostList(ListView) :
     # post_list.html
     # 따로 템플릿 연결을 하지 않아도 클래스에 해당하는 html 이름으로 바꾸었으므로 자동으로 연결된다.
 
-class PostDetail(DetailView) :
+
+class PostDetail(DetailView):
     model = Post
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -48,18 +50,32 @@ class PostDetail(DetailView) :
     # template_name = 'blog/post_detail.html'
     # post_detail.html
 
+
 def category_page(request, slug):
-    if slug == 'no_category' :
+    if slug == 'no_category':
         category = '미분류'
         post_list = Post.objects.filter(category=None)
-    else :
+    else:
         category = Category.objects.get(slug=slug)  # 받은 slug값과 같으면 카테고리값을 가져옴
         post_list = Post.objects.filter(category=category)
 
     return render(request, 'blog/post_list.html',
                   {
-                      'post_list' : post_list,  #카테고리 값이 같은 Post만 가져옴
-                      'categories' : Category.objects.all(),
-                      'no_category_post_count' : Post.objects.filter(category=None).count(),
-                      'category' : category
+                      'post_list': post_list,  # 카테고리 값이 같은 Post만 가져옴
+                      'categories': Category.objects.all(),
+                      'no_category_post_count': Post.objects.filter(category=None).count(),
+                      'category': category
+                  })
+
+
+def tag_page(request, slug):
+    tag = Tag.objects.get(slug=slug)  # 받은 slug값과 같으면 카테고리값을 가져옴
+    post_list = tag.post_set.all()  # 다대다관계 // Post.objects.filter(tags=tag) 다대일관계
+
+    return render(request, 'blog/post_list.html',
+                  {
+                      'post_list': post_list,  # 카테고리 값이 같은 Post만 가져옴
+                      'categories': Category.objects.all(),
+                      'no_category_post_count': Post.objects.filter(category=None).count(),
+                      'tag': tag
                   })

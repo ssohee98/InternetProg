@@ -2,7 +2,19 @@ from django.db import models
 from django.contrib.auth.models import User
 import os
 
+
 # Create your models here.
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return f'/blog/tag/{self.slug}'
+
+
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
@@ -23,13 +35,13 @@ class Post(models.Model):
     hook_text = models.CharField(max_length=100, blank=True)
     content = models.TextField()
 
-    #사용한 이미지 주소 (업로드할 경로, 필수는 아님)
+    # 사용한 이미지 주소 (업로드할 경로, 필수는 아님)
     head_image = models.ImageField(upload_to='blog/images/%Y/%m/%d', blank=True)
-    #업로드한 파일 주소
+    # 업로드한 파일 주소
     file_upload = models.FileField(upload_to='blog/files/%Y/%m/%d', blank=True)
-    #포스트한 날짜
+    # 포스트한 날짜
     created_at = models.DateTimeField(auto_now_add=True)
-    #사용자 지정이 아니라 포스트 생성시 자동으로 현재 시간, 날짜 데베에 저장
+    # 사용자 지정이 아니라 포스트 생성시 자동으로 현재 시간, 날짜 데베에 저장
     updated_at = models.DateTimeField(auto_now=True)
 
     # User에서 어떤 사용자가 삭제되면 그 사용자가 생성한 포스트도 모두 삭제
@@ -38,8 +50,9 @@ class Post(models.Model):
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
+    tags = models.ManyToManyField(Tag, blank=True)  # 다대다 관계
 
-    #각 object의 primarykey(id), title, 저자정보를 목록에 보여주는 함수
+    # 각 object의 primarykey(id), title, 저자정보를 목록에 보여주는 함수
     def __str__(self):
         return f'[{self.pk}]{self.title} :: {self.author}'
 

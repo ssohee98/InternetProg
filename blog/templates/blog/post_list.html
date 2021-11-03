@@ -2,7 +2,9 @@
  {% block main_area %}
 
                 <h1>
-                    Blog {% if category %} <span class="badge bg-secondary">{{category}}</span>{% endif %}
+                    Blog
+                    {% if category %} <span class="badge bg-secondary">{{category}}</span>{% endif %}
+                    {% if tag %} <i class ="fas fa-tags"></i><span class="badge bg-light">{{tag}}({{tag.post_set.count}})</span>{% endif %}
                 </h1>
                 {% if post_list.exists %}
 
@@ -27,6 +29,13 @@
                             <h5 class="text_muted"> {{ p.hook_text }} </h5>
                         {% endif %}
                         <p class="card-text">{{ p.content | truncatewords:45 }}</p>     <!--목록페이지 모든 내용 출력하지 않고 45자까지만 출력-->
+                        {% if p.tags.exists %}
+                            <i class="fas fa-tags"></i>
+                            {% for tag in p.tags.all %}
+                                <a href="{{tag.get_absolute_url}}"><span class="badge bg-light">{{tag}}</span></a>
+                            {% endfor %}
+                            <br/><br/>
+                        {% endif %}
                         <a class="btn btn-primary" href="{{ p.get_absolute_url }}">Read more →</a>
                     </div>
                     <div class="card-footer">
