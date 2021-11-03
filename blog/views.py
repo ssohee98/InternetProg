@@ -1,6 +1,6 @@
-from django.shortcuts import render
-from django.views.generic import ListView, DetailView
-
+from django.shortcuts import render, redirect
+from django.views.generic import ListView, DetailView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Post, Category, Tag
 
 
@@ -23,6 +23,21 @@ from .models import Post, Category, Tag
 #                       'post': post
 #                   }
 #                   )
+
+class PostCreate(LoginRequiredMixin, CreateView):
+    model = Post
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category', 'tags']
+
+    def form_valid(self, form):
+        current_user = self.request.user
+        # 현재 사용자가 허락받은 사용자인가 테스트
+        if current_user.is_authenticated :
+            # 비어있는 author instance에 현재 사용자 넣기
+            form.instance.author = current_user
+            return super(PostCreate, self).form_valid(form)
+        else :
+            # 사용자 테스트 넘어가지 못한 경우 디폴트로 그냥 블로그 페이지 보여주기
+            return redirect('/blog/')
 
 class PostList(ListView):
     model = Post
@@ -69,7 +84,7 @@ def category_page(request, slug):
 
 
 def tag_page(request, slug):
-    tag = Tag.objects.get(slug=slug)  # 받은 slug값과 같으면 카테고리값을 가져옴
+    tag = Tag.objects.get(slug=slug)  # 받은 slug값과 같으면 태그값을 가져옴
     post_list = tag.post_set.all()  # 다대다관계 // Post.objects.filter(tags=tag) 다대일관계
 
     return render(request, 'blog/post_list.html',

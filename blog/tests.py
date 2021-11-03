@@ -103,7 +103,29 @@ class TestView(TestCase):
         self.assertIn(self.post_001.title, main_area.text)
         self.assertNotIn(self.post_002.title, main_area.text)
         self.assertNotIn(self.post_003.title, main_area.text)
-        
+
+    def test_create_post(self):
+        # 사용자가 로그인 되어 있는지 확인
+        response = self.client.get('/blog/create_post/', follow=True)
+        self.assertNotEqual(response.status_code, 200)
+        self.client.login(username='Trump', password='somepassword')
+        # 정상적으로 페이지가 로드되었는지                                  
+        self.assertEqual(response.status_code, 200)          
+        # 페이지 타이틀이 'Blog'인가                                  
+        soup = BeautifulSoup(response.content, 'html.parser')
+        self.assertEqual(soup.title.text, 'Create Post - Blog')
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('Create New Post', main_area.text)
+
+        self.client.post('/blog/create_post/',
+                         {
+                             'title' : 'Post form 만들기',
+                             'content' : "Post form 페이지 만들기"
+                         })
+        last_post = Post.objects.last()
+        self.assertEqual(last_post.title, "Post form 만들기")
+        self.assertEqual(last_post.author.username, 'trump')
+
     # 블로그 테스트
     def test_post_list(self):
         # 포스트 목록 페이지를 가져온다
