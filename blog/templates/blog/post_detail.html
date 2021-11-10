@@ -18,8 +18,17 @@
                             <h1 class="fw-bolder mb-1">{{ post.title }}</h1>
                             <h5 class="text_muted">{{ post.hook_text }}</h5>
                             <!-- Post meta content-->
-                            <div class="text-muted fst-italic mb-2">{{ post.created_at | date:"20y-m-d h:m:s"}} by
-                                {{post.author | upper}}</div>
+                            <div class="text-muted fst-italic mb-2">
+                                {{ post.created_at | date:"20y-m-d h:m:s"}}
+                                by {{post.author | upper}}
+                                # 로그인 된 작성자와 포스트 작성자가 같은 경우에만 수정 링크 보이도록록                                {% if user.is_authenticated and user == post.author %}
+                                    <a href="/blog/update_post/{{post.pk}}/"
+                                        class="btn btn-info btn-sm float-right">
+                                        <i class="fas fa-pen"></i>
+                                        Edit Post
+                                    </a>
+                                {% endif %}
+                            </div>
                             <!-- Post categories-->
 <!--                            <a class="badge bg-secondary text-decoration-none link-light" href="#!">Web Design</a>-->
 <!--                            <a class="badge bg-secondary text-decoration-none link-light" href="#!">Freebies</a>-->

@@ -66,11 +66,11 @@ class TestView(TestCase):
 
     # category 테스트
     def category_test(self, soup):
-        category = soup.find('div', id='categories-card')
-        self.assertIn('Categories', category.text)
-        self.assertIn(f'{self.category_programming.name} ({self.category_programming.post_set.count()})', category.text)
-        self.assertIn(f'{self.category_culture.name} ({self.category_culture.post_set.count()})', category.text)
-        self.assertIn(f'미분류 (1)', category.text)
+        categories_card = soup.find('div', id='categories-card')
+        self.assertIn('Categories', categories_card.text)
+        self.assertIn(f'{self.category_programming.name} ({self.category_programming.post_set.count()})', categories_card.text)
+        self.assertIn(f'{self.category_culture.name} ({self.category_culture.post_set.count()})', categories_card.text)
+        self.assertIn(f'미분류 (1)', categories_card.text)
 
     def test_category_page(self):
         # 카테고리 페이지 url로 불러오기
@@ -126,14 +126,58 @@ class TestView(TestCase):
         main_area = soup.find('div', id='main-area')
         self.assertIn('Create New Post', main_area.text)
 
+        tag_str_input = main_area.find('input', id='id_tags_str')
+        self.assertTrue(tag_str_input)
+
         self.client.post('/blog/create_post/',
                          {
                              'title' : 'Post form 만들기',
-                             'content' : "Post form 페이지 만들기"
+                             'content' : "Post form 페이지 만들기",
+                             'tags_str' : 'new tag; 한글태그, python'
                          })
         last_post = Post.objects.last()
         self.assertEqual(last_post.title, "Post form 만들기")
         self.assertEqual(last_post.author.username, 'James')
+
+        self.assertEqual(last_post.tags.count(), 3)
+        self.assertTrue(Tag.objects.get(name='new tag'))
+        self.assertTrue(Tag.objects.get(name='한글태그'))
+        self.assertEqual(Tag.objects.count(), 5)
+
+    def test_update_post(self):
+        update_url = f'/blog/update_post/{self.post_003.pk}/'
+        # 로그인 하지 않은 경우 // Post3에 대해
+        response = self.client.get(update_url)
+        self.assertNotEqual(response.status_code, 200)
+
+        # 로그인했지만 작성자가 아닌 경우
+        self.assertNotEqual(self.post_003.author, self.user_james)
+        self.client.login(username="James", password="somepassword")
+        response = self.client.get(update_url)
+        self.assertEqual(response.status_code, 403)
+        # 403 : forbidden (접근권한금지)
+
+        # 작성자가 로그인해서 작성한 경우
+        self.client.login(username="Trump", password="somepassword")
+        response = self.client.get(update_url)
+        self.assertEqual(response.status_code, 200)
+
+        # 수정 페이지
+        soup = BeautifulSoup(response.content, 'html.parser')
+        self.assertEqual(soup.title.text, 'Edit Post - Blog')
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('Edit Post', main_area.text)
+
+        # 실제 수정 후 확인
+        response = self.client.post(update_url,
+                         { 'title' : '세번째 포스트 수정',
+                           'content' : '안녕? 우리는 하나 // 반가워요',
+                           'category' : self.category_culture.pk}, follow=True)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('세번째 포스트 수정', main_area.text)
+        self.assertIn('안녕? 우리는 하나 // 반가워요', main_area.text)
+        self.assertIn(self.category_culture, main_area.text)
 
     # 블로그 테스트
     def test_post_list(self):

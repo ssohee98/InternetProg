@@ -1,7 +1,10 @@
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, CreateView
+from django.utils.text import slugify
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post, Category, Tag
+
 
 
 # Create your views here.
@@ -26,7 +29,7 @@ from .models import Post, Category, Tag
 
 class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Post
-    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category', 'tags']
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
 
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.is_staff
@@ -37,16 +40,44 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if current_user.is_authenticated and (current_user.is_staff or current_user.is_superuser):
             # 비어있는 author instance에 현재 사용자 넣기
             form.instance.author = current_user
-            return super(PostCreate, self).form_valid(form)
-        else :
+            response = super(PostCreate, self).form_valid(form)
+            tags_str = self.request.POST.get('tags_str')
+            if tags_str :
+                tags_str = tags_str.strip() # 불필요한 공백 제거
+                tags_str = tags_str.replace(',', ';')   #모든 콤마를 세미콜론으로 변경
+                tags_list = tags_str.split(';')
+                for t in tags_list :
+                    t = t.strip()
+                    tag, is_tag_created = Tag.objects.get_or_create(name=t)
+                    if is_tag_created :
+                        tag.slug = slugify(t, allow_unicode=True)
+                        tag.save()
+                    self.object.tags.add(tag)
+            return response
+        else:
             # 사용자 테스트 넘어가지 못한 경우 디폴트로 그냥 블로그 페이지 보여주기
             return redirect('/blog/')
+
+
+class PostUpdate(LoginRequiredMixin, UpdateView):  # 모델명_form 템플릿 사용
+    model = Post
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category', 'tags']
+
+    template_name = 'blog/post_update_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # 로그인된 유저와 실제 작성자가 같으면
+        if request.user.is_authenticated and request.user == self.get_object().author:
+            return super(PostUpdate, self).dispatch(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
+
 
 class PostList(ListView):
     model = Post
     ordering = '-pk'
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super(PostList, self).get_context_data()
         context['categories'] = Category.objects.all()
         context['no_category_post_count'] = Post.objects.filter(category=None).count()
