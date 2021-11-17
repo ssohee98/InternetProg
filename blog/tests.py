@@ -133,7 +133,7 @@ class TestView(TestCase):
                          {
                              'title' : 'Post form 만들기',
                              'content' : "Post form 페이지 만들기",
-                             'tags_str' : 'new tag; 한글태그, python'
+                             'tags_str' : 'new tag; 한글 태그, python'
                          })
         last_post = Post.objects.last()
         self.assertEqual(last_post.title, "Post form 만들기")
