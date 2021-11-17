@@ -22,6 +22,7 @@ from django.conf import settings
 urlpatterns = [
     path('blog/', include('blog.urls')),    # 서버IP/blog
     path('admin/', admin.site.urls),    # 서버IP/admin
+    path('markdownx/', include('markdownx.urls')),
     path('', include('single_pages.urls')),    # 서버IP/
 ]
 

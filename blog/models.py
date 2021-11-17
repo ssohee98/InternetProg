@@ -2,8 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 import os
 
+from markdown import markdown
+from markdownx.models import MarkdownxField
+
 
 # Create your models here.
+
+
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
@@ -33,7 +38,7 @@ class Post(models.Model):
     title = models.CharField(max_length=30)
 
     hook_text = models.CharField(max_length=100, blank=True)
-    content = models.TextField()
+    content = MarkdownxField()
 
     # 사용한 이미지 주소 (업로드할 경로, 필수는 아님)
     head_image = models.ImageField(upload_to='blog/images/%Y/%m/%d', blank=True)
@@ -67,3 +72,6 @@ class Post(models.Model):
     # 업로드된 파일 확장자 가져오기
     def get_file_ext(self):
         return self.get_file_name().split('.')[-1]  # split 된 배열중 가장 마지막 요소가 확장자
+
+    def get_content_markdown(self):
+        return markdown(self.content)

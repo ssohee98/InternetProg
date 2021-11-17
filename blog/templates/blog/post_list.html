@@ -35,7 +35,7 @@
                         {% if p.hook_text %}    <!-- hook_text가 있으면 출력, 없으면 말고-->
                             <h5 class="text_muted"> {{ p.hook_text }} </h5>
                         {% endif %}
-                        <p class="card-text">{{ p.content | truncatewords:45 }}</p>     <!--목록페이지 모든 내용 출력하지 않고 45자까지만 출력-->
+                        <p class="card-text">{{ p.get_content_markdown | truncatewords_html:50 | safe}}</p>     <!--목록페이지 모든 내용 출력하지 않고 45자까지만 출력-->
                         {% if p.tags.exists %}
                             <i class="fas fa-tags"></i>
                             {% for tag in p.tags.all %}

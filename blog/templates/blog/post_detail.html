@@ -21,7 +21,7 @@
                             <div class="text-muted fst-italic mb-2">
                                 {{ post.created_at | date:"20y-m-d h:m:s"}}
                                 by {{post.author | upper}}
-                                # 로그인 된 작성자와 포스트 작성자가 같은 경우에만 수정 링크 보이도록록                                {% if user.is_authenticated and user == post.author %}
+<!--                                로그인 된 작성자와 포스트 작성자가 같은 경우에만 수정 링크 보이도록록                                {% if user.is_authenticated and user == post.author %}-->
                                     <a href="/blog/update_post/{{post.pk}}/"
                                         class="btn btn-info btn-sm float-right">
                                         <i class="fas fa-pen"></i>
@@ -42,7 +42,7 @@
                             {% endif %}
                         <!-- Post content-->
                         <section class="mb-5">
-                            <p> {{ post.content}} </p>
+                            <p> {{ post.get_content_markdown | safe }} </p>
                             {% if post.tags.exists %}
                                 <i class="fas fa-tags"></i>
                                 {% for tag in post.tags.all %}
