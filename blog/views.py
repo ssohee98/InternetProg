@@ -144,7 +144,6 @@ def category_page(request, slug):
                       'category': category
                   })
 
-
 def tag_page(request, slug):
     tag = Tag.objects.get(slug=slug)  # 받은 slug값과 같으면 태그값을 가져옴
     post_list = tag.post_set.all()  # 다대다관계 // Post.objects.filter(tags=tag) 다대일관계
@@ -156,3 +155,5 @@ def tag_page(request, slug):
                       'no_category_post_count': Post.objects.filter(category=None).count(),
                       'tag': tag
                   })
+
+
