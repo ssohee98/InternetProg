@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
-from .models import Post, Category, Tag
+from .models import Post, Category, Tag, Comment
 
 
 # Create your tests here.
@@ -42,6 +42,12 @@ class TestView(TestCase):
         )
         self.post_003.tags.add(self.tag_python)
         self.post_003.tags.add(self.tag_python_kor)
+
+        self.comment_001 = Comment.objects.create(
+            post = self.post_001,
+            author = self.user_trump,
+            content = '첫번째 댓글입니다.'
+        )
 
     # navbar 테스트
     def navbar_test(self, soup):
@@ -266,12 +272,17 @@ class TestView(TestCase):
         self.assertNotIn(self.tag_python.name, post_area.text)
         self.assertNotIn(self.tag_python_kor.name, post_area.text)
 
+        # 포스트의 내용이 있는가
+        self.assertIn(self.post_001.content, post_area.text)
         # 포스트 작성자가 있는가 (아직 작성중...)
         self.assertIn(self.user_james.username.upper(), post_area.text)
 
-        # 포스트의 내용이 있는가
+        # 댓글
+        comments_area = soup.find('div', id='comment-area')
+        comments_001_area = comments_area.find('div', id='comment-1')
+        self.assertIn(self.comment_001.author.username, comments_001_area.text)
+        self.assertIn(self.comment_001.content, comments_001_area.text)
 
-        self.assertIn(self.post_001.content, post_area.text)
 
 
 
