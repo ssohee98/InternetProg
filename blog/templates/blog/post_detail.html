@@ -1,4 +1,5 @@
 {% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
 {% block head_title %}
     {{ post.title }} - Blog
 {% endblock %}
@@ -64,16 +65,28 @@
                                 </a>
                             {% endif %}
                         </section>
-                    </div>
                     <!-- Comments section-->
                     <div class="mb-5" id="comment-area">
                         <div class="card bg-light">
                             <div class="card-body">
                                 <!-- Comment form-->
-                                <form class="mb-4"><textarea class="form-control" rows="3" placeholder="Join the discussion and leave a comment!"></textarea></form>
+                                {% if user.is_authenticated %}
+                                <form id="comment-form" method="POST" action="{{ post.get_absolute_url }}new_comment/">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        {{comment_form | crispy}}
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                                {% else %}
+                                <a role="button" class="btn btn-outline-dark" href="#" data-toggle="modal" data-target="#loginModal">
+                                    Log in and leave a comment</a>
+                                {% endif %}
+                            </div>
+                        </div>
 
                                 {% if post.comment_set.exists %}
-                                {% for comment in post.comment_set.all %}
+                                {% for comment in post.comment_set.all %}s
                                 <!-- Single comment-->
                                 <!-- comment 가 있는 경우에만 출력-->
                                 <div class="d-flex" id="comment-{{comment.pk}}">
@@ -81,13 +94,13 @@
                                     <div class="ms-3">
                                         <div class="fw-bold">{{ comment.author.username }} &nbsp;&nbsp;&nbsp;
                                             <small class="text-muted">({{ comment.created_at }})</small></div>
-                                        <p>{{ comment.content | linebreaks}}</p>
+                                        <p>{{ comment.content | linebreaks }}</p>
+                                        </div>
                                     </div>
-                                </div>
                                 {% endfor %}
                                 {% endif %}
-                            </div>
-                        </div>
+                                </div>
                     </div>
+
 
 {% endblock %}

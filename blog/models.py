@@ -63,7 +63,7 @@ class Post(models.Model):
 
     # 각 상세 페이지로 이동 + 장고에 view on site 버튼
     def get_absolute_url(self):
-        return f'/blog/{self.pk}'
+        return f'/blog/{self.pk}/'
 
     # 업로드된 파일 이름 가져오기
     def get_file_name(self):
@@ -75,6 +75,7 @@ class Post(models.Model):
 
     def get_content_markdown(self):
         return markdown(self.content)
+
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
