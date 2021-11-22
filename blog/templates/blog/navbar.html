@@ -1,5 +1,6 @@
 {% load socialaccount %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class = "container">
         <a class="navbar-brand" href="/">Internet Programming</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -22,12 +23,16 @@
               <li class="nav-item dropdown">
                   <a class = "nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
                   data-toggle="dropdown">
+                      {% if user.socialaccount_set.all.0.get_avatar_url %}
+                                <img class="rounded-circle" width="25px" src="{{ user.socialaccount_set.all.0.get_avatar_url }}" alt="">
+                            {% else %}
+                                <img class="rounded-circle" width="25px" src="https://doitdjango.com/avatar/id/384/558d57b5d8a79409/svg/{{ user.email }}">
+                            {% endif %}
+                            &nbsp;
                       {{ user.username }}
                   </a>
-                  <div class = "dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a role="button" class="btn btn-primary" href="/accounts/logout/">
-                    Log Out
-                    </a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a role="button" class="btn btn-primary" href="/accounts/logout/">Log Out</a>
                   </div>
               </li>
             {% else %}
@@ -38,6 +43,7 @@
             </li>
               {% endif %}
           </ul>
+        </div>
         </div>
     </nav>
 
